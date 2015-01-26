@@ -19,6 +19,7 @@ package org.sebi.adm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -58,6 +59,18 @@ public class PayloadBuilderTest {
         final PayloadBuilder builder = new PayloadBuilder();
         builder.expiresAfter(86400);
         final String expected = "{\"expiresAfter\":86400,\"data\":{}}";
+        final String actual = builder.toString();
+        assertEqualsJson(expected, actual);
+    }
+
+    @Test
+    public void testDataFields() {
+        final PayloadBuilder builder = ADM.newPayload();
+        Map fields = new HashMap();
+        fields.put("custom","custom");
+        fields.put("custom1","custom1");
+        builder.dataFields(fields);
+        final String expected = "{\"data\":{\"custom\":\"custom\",\"custom1\":\"custom1\"}}";
         final String actual = builder.toString();
         assertEqualsJson(expected, actual);
     }
