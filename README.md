@@ -1,4 +1,4 @@
-# Amazon Device Messaging Java Connector
+# Amazon Device Messaging Java Connector [![Build Status](https://travis-ci.org/aerogear/java-adm.png)](https://travis-ci.org/aerogear/java-adm)
 
 A Java Library to send Push Notification to the Amazon Device Messaging Network.
 A complete documentation of the protocol can be found [here](https://developer.amazon.com/appsandservices/apis/engage/device-messaging/)
