@@ -18,8 +18,8 @@ Add the following to your ```pom.xml``` file:
 Then :
 
 ```
-MessageService messageService = ADM.newService();
-PayloadBuilder builder = ADM.newPayload();
+final AdmService messageService = ADM.newService();
+final PayloadBuilder builder = ADM.newPayload();
 builder.dataField("custom","custom");
 
 messageService.sendMessageToDevice(<registrationId>, <clientId>, <clientSecret>, builder.build());
