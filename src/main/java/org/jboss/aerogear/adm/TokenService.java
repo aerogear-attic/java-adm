@@ -26,14 +26,17 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 
 public class TokenService {
 
-    public static final String CLIENT_CREDENTIALS = "client_credentials";
-    public static final String ENCODING = "UTF-8";
-    public static final String MESSAGING_PUSH = "messaging:push";
-    public static final String HTTPS_API_AMAZON_COM_AUTH_O2_TOKEN = "https://api.amazon.com/auth/O2/token";
-    public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    private static final String UTF_8 = "UTF-8";
+    private static final Charset UTF_8_CHARSET= Charset.forName(UTF_8);
+
+    private static final String CLIENT_CREDENTIALS = "client_credentials";
+    private static final String MESSAGING_PUSH = "messaging:push";
+    private static final String HTTPS_API_AMAZON_COM_AUTH_O2_TOKEN = "https://api.amazon.com/auth/O2/token";
+    private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     /**
      * To obtain an access token, make an HTTPS request to Amazon
@@ -47,49 +50,79 @@ public class TokenService {
     public String getAuthToken(String clientId, String clientSecret) throws Exception
     {
         // Encode the body of your request, including your clientID and clientSecret values.
-        String body = "grant_type="    + URLEncoder.encode(CLIENT_CREDENTIALS, ENCODING) + "&" +
-                "scope="         + URLEncoder.encode(MESSAGING_PUSH, ENCODING)     + "&" +
-                "client_id="     + URLEncoder.encode(clientId, ENCODING)             + "&" +
-                "client_secret=" + URLEncoder.encode(clientSecret, ENCODING);
-
-        // Create a new URL object with the base URL for the access token request.
-        URL authUrl = new URL(HTTPS_API_AMAZON_COM_AUTH_O2_TOKEN);
+        String body = "grant_type="    + URLEncoder.encode(CLIENT_CREDENTIALS, UTF_8) + "&" +
+                "scope="         + URLEncoder.encode(MESSAGING_PUSH, UTF_8)     + "&" +
+                "client_id="     + URLEncoder.encode(clientId, UTF_8)             + "&" +
+                "client_secret=" + URLEncoder.encode(clientSecret, UTF_8);
 
         // Generate the HTTPS connection. You cannot make a connection over HTTP.
-        HttpsURLConnection con = (HttpsURLConnection) authUrl.openConnection();
-        con.setDoOutput( true );
-        con.setRequestMethod( "POST" );
-
-        // Set the Content-Type header.
-        con.setRequestProperty( "Content-Type" , APPLICATION_X_WWW_FORM_URLENCODED);
-        con.setRequestProperty( "Charset" , ENCODING );
-        // Send the encoded parameters on the connection.
-        OutputStream os = con.getOutputStream();
-        os.write(body.getBytes( "UTF-8" ));
-        os.flush();
-        con.connect();
+        final HttpsURLConnection con = post(body);
 
         // Convert the response into a String object.
-        String responseContent = parseResponse(con.getInputStream());
+        final String responseContent = parseResponse(con.getInputStream());
 
         // Create a new JSONObject to hold the access token and extract
         // the token from the response.
-        JSONObject parsedObject = new org.json.JSONObject(responseContent);
-        String accessToken = parsedObject.getString("access_token");
+        final JSONObject parsedObject = new org.json.JSONObject(responseContent);
+        final String accessToken = parsedObject.getString("access_token");
         return accessToken;
     }
 
-    private String parseResponse(InputStream in) throws Exception
-    {
-        InputStreamReader inputStream = new InputStreamReader(in, ENCODING );
-        BufferedReader buff = new BufferedReader(inputStream);
+    /**
+     * Returns HttpsURLConnection that 'posts' the given payload to ADM.
+     */
+    private HttpsURLConnection post(final String payload) throws Exception {
 
-        StringBuilder sb = new StringBuilder();
-        String line = buff.readLine();
-        while (line != null )
-        {
-            sb.append(line);
-            line = buff.readLine();
+        final HttpsURLConnection conn = getHttpsURLConnection();
+        conn.setDoOutput(true);
+        conn.setUseCaches(false);
+
+        // Set the content type .
+        conn.setRequestProperty("content-type", APPLICATION_X_WWW_FORM_URLENCODED);
+        conn.setRequestProperty("charset", UTF_8);
+
+        conn.setRequestMethod("POST");
+
+        OutputStream out = null;
+        final byte[] bytes = payload.getBytes(UTF_8_CHARSET);
+        try {
+            out = conn.getOutputStream();
+            out.write(bytes);
+            out.flush();
+        } finally {
+            // in case something blows up, while writing
+            // the payload, we wanna close the stream:
+            if (out != null) {
+                out.close();
+            }
+        }
+
+        return conn;
+    }
+
+    /**
+     * Convenience method to open/establish the HttpsURLConnection agains ADM
+     */
+    private HttpsURLConnection getHttpsURLConnection() throws Exception {
+        // Create a new URL object with the base URL for the access token request.
+        URL authUrl = new URL(HTTPS_API_AMAZON_COM_AUTH_O2_TOKEN);
+
+        final HttpsURLConnection conn = (HttpsURLConnection) authUrl.openConnection();
+        return conn;
+    }
+
+    private String parseResponse(InputStream in) throws Exception  {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(in, UTF_8_CHARSET ));
+        final StringBuilder sb = new StringBuilder();
+
+        try {
+            String line = reader.readLine();
+            while(line != null) {
+                sb.append(line);
+                line = reader.readLine();
+            }
+        } finally {
+            reader.close();
         }
 
         return sb.toString();
