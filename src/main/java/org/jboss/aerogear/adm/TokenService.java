@@ -38,6 +38,11 @@ public class TokenService {
     /**
      * To obtain an access token, make an HTTPS request to Amazon
      * and include your client_id and client_secret values.
+     * 
+     * @param clientId unique ID supplied by ADM Services
+     * @param clientSecret secret value supplied by ADM services
+     * @return a String containing your auth token
+     * @throws Exception if retrieving the Auth token fails
      */
     public String getAuthToken(String clientId, String clientSecret) throws Exception
     {

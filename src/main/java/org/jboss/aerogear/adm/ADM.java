@@ -17,17 +17,25 @@
 
 package org.jboss.aerogear.adm;
 
-
+/**
+ * The main class to interact with the ADM Service.
+ */
 public class ADM {
 
     private ADM() {
         throw new AssertionError("Uninstantiable class");
     }
 
+    /**
+     * @return a new {@link org.jboss.aerogear.adm.PayloadBuilder} instance
+     */
     public static PayloadBuilder newPayload() {
         return new PayloadBuilder();
     }
 
+    /**
+     * @return a new {@link org.jboss.aerogear.adm.MessageService} for sending ADM notifications
+     */
     public static MessageService newService() {
         return new MessageService();
     }

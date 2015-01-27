@@ -25,6 +25,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 
+/**
+ * A service to submit your payload to the ADM Network.
+ * The code is freely inspired from <a href="https://developer.amazon.com/appsandservices/apis/engage/device-messaging/tech-docs/06-sending-a-message">Amazon's Developers Documentation</a>
+ *
+ */
 public class MessageService {
 
     private TokenService tokenService;
@@ -37,6 +42,12 @@ public class MessageService {
 
     /**
      * Request that ADM deliver your message to a specific instance of your app.
+     *
+     * @param registrationId representing the unique identifier of the device
+     * @param clientId unique ID supplied by ADM Services
+     * @param clientSecret secret value supplied by ADM services
+     * @param payload , a String representing the complete payload to be submitted
+     * @throws Exception if sending the message fails
      */
     public void sendMessageToDevice(String registrationId, String clientId, String clientSecret, String payload) throws Exception
     {
