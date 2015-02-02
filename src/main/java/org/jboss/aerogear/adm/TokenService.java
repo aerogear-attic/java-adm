@@ -39,8 +39,7 @@ public class TokenService {
      * @return a String containing your auth token
      * @throws Exception if retrieving the Auth token fails
      */
-    public String getAuthToken(String clientId, String clientSecret) throws Exception
-    {
+    public String getAuthToken(String clientId, String clientSecret) throws Exception {
         // Encode the body of your request, including your clientID and clientSecret values.
         String body = buildBody(clientId, clientSecret);
 

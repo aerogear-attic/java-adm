@@ -28,7 +28,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-public class Utilities {
+public final class Utilities {
 
     public static final String APPLICATION_JSON = "application/json";
     public static final String AMAZON_TYPE_VERSION = "com.amazon.device.messaging.ADMMessage@1.0";
@@ -43,6 +43,9 @@ public class Utilities {
 
     public static final String CLIENT_CREDENTIALS = "client_credentials";
     public static final String MESSAGING_PUSH = "messaging:push";
+
+
+    private Utilities() {}
 
     /**
      * Convenience method to open/establish the HttpsURLConnection agains ADM

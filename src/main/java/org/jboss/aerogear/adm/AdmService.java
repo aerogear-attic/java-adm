@@ -45,9 +45,10 @@ public class AdmService {
      * @param clientId unique ID supplied by ADM Services
      * @param clientSecret secret value supplied by ADM services
      * @param payload , a String representing the complete payload to be submitted
+     * @return String , a String representing the registrationId sent back from ADM services.
      * @throws Exception if sending the message fails
      */
-    public void sendMessageToDevice(final String registrationId, final String clientId, final String clientSecret, final String payload) throws Exception {
+    public String sendMessageToDevice(String registrationId, final String clientId, final String clientSecret, final String payload) throws Exception {
 
         if (accessToken == null) {
             accessToken = tokenService.getAuthToken(clientId,clientSecret);
@@ -83,11 +84,10 @@ public class AdmService {
 
             // Check if the two Registration IDs are different.
             if(!canonicalRegistrationId.equals(registrationId)) {
-                // At this point the data structure that stores the Registration ID values should be updated
-                // with the correct Registration ID for this particular app instance.
+                registrationId = canonicalRegistrationId;
             }
         }
-
+        return registrationId;
     }
 
     /**
@@ -109,8 +109,7 @@ public class AdmService {
         conn.setRequestProperty("accept", Utilities.APPLICATION_JSON);
         conn.setRequestProperty("X-Amzn-Type-Version ", Utilities.AMAZON_TYPE_VERSION);
         conn.setRequestProperty("X-Amzn-Accept-Type", Utilities.AMAZON_ACCEPT_TYPE);
-
-                conn.setRequestMethod("POST");
+        conn.setRequestMethod("POST");
 
         // Add the authorization token as a header.
         conn.setRequestProperty("Authorization", "Bearer " + accessToken);
