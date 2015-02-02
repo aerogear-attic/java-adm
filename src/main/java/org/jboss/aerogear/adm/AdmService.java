@@ -16,15 +16,13 @@
  */
 package org.jboss.aerogear.adm;
 
-import org.json.JSONObject;
+import org.jboss.aerogear.adm.internal.Utilities;
+
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
-import java.nio.charset.Charset;
+
 
 /**
  * A service to submit your payload to the ADM Network.
@@ -32,9 +30,6 @@ import java.nio.charset.Charset;
  *
  */
 public class AdmService {
-
-    private static final String ADM_URL_TEMPLATE = "https://api.amazon.com/messaging/registrations/%1$s/messages";
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     private final TokenService tokenService;
     private String accessToken;
@@ -72,7 +67,7 @@ public class AdmService {
                 sendMessageToDevice(registrationId, clientId, clientSecret, payload);
             }
             else {
-                String errorContent = parseResponse(conn.getErrorStream());
+                String errorContent = Utilities.parseResponse(conn.getErrorStream());
                 throw new RuntimeException(String.format("ERROR: The enqueue request failed with a " +
                         "%d response code, with the following message: %s",
                         responseCode, errorContent));
@@ -83,10 +78,8 @@ public class AdmService {
             // The request was successful. The response contains the canonical Registration ID for the specific instance of your
             // app, which may be different that the one used for the request.
 
-            final String responseContent = parseResponse(conn.getInputStream());
-            final JSONObject parsedObject = new JSONObject(responseContent);
-
-            final String canonicalRegistrationId = parsedObject.getString("registrationID");
+            final String responseContent = Utilities.parseResponse(conn.getInputStream());
+            final String canonicalRegistrationId = Utilities.getStringFromJson(responseContent, "registrationID");
 
             // Check if the two Registration IDs are different.
             if(!canonicalRegistrationId.equals(registrationId)) {
@@ -102,23 +95,28 @@ public class AdmService {
      */
     private HttpsURLConnection post(final String registrationId, final String payload) throws Exception {
 
-        final HttpsURLConnection conn = getHttpsURLConnection(registrationId);
+        // Establish the base URL, including the section to be replaced by the registration
+        // ID for the desired app instance. Because we are using String.format to create
+        // the URL, the %1$s characters specify the section to be replaced.
+        final URL admUrl = new URL(String.format(Utilities.ADM_URL_TEMPLATE ,registrationId));
+
+        final HttpsURLConnection conn = Utilities.getHttpsURLConnection(admUrl);
         conn.setDoOutput(true);
         conn.setUseCaches(false);
 
         // Set the content type and accept headers.
-        conn.setRequestProperty("content-type", "application/json");
-        conn.setRequestProperty("accept", "application/json");
-        conn.setRequestProperty("X-Amzn-Type-Version ", "com.amazon.device.messaging.ADMMessage@1.0");
-        conn.setRequestProperty("X-Amzn-Accept-Type", "com.amazon.device.messaging.ADMSendResult@1.0");
+        conn.setRequestProperty("content-type", Utilities.APPLICATION_JSON);
+        conn.setRequestProperty("accept", Utilities.APPLICATION_JSON);
+        conn.setRequestProperty("X-Amzn-Type-Version ", Utilities.AMAZON_TYPE_VERSION);
+        conn.setRequestProperty("X-Amzn-Accept-Type", Utilities.AMAZON_ACCEPT_TYPE);
 
-        conn.setRequestMethod("POST");
+                conn.setRequestMethod("POST");
 
         // Add the authorization token as a header.
         conn.setRequestProperty("Authorization", "Bearer " + accessToken);
 
         OutputStream out = null;
-        final byte[] bytes = payload.getBytes(UTF_8);
+        final byte[] bytes = payload.getBytes(Utilities.UTF_8_CHARSET);
         try {
             out = conn.getOutputStream();
             out.write(bytes);
@@ -132,36 +130,5 @@ public class AdmService {
         }
 
         return conn;
-    }
-
-    /**
-     * Convenience method to open/establish the HttpsURLConnection agains ADM
-     */
-    private HttpsURLConnection getHttpsURLConnection(final String registrationId) throws Exception {
-        // Establish the base URL, including the section to be replaced by the registration
-        // ID for the desired app instance. Because we are using String.format to create
-        // the URL, the %1$s characters specify the section to be replaced.
-        final URL admUrl = new URL(String.format(ADM_URL_TEMPLATE ,registrationId));
-
-        final HttpsURLConnection conn = (HttpsURLConnection) admUrl.openConnection();
-        return conn;
-    }
-
-    private String parseResponse(final InputStream in) throws Exception {
-        // Read from the input stream and convert into a String.
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        final StringBuilder sb = new StringBuilder();
-
-        try {
-            String line = reader.readLine();
-            while(line != null) {
-                sb.append(line);
-                line = reader.readLine();
-            }
-        } finally {
-            reader.close();
-        }
-
-        return sb.toString();
     }
 }

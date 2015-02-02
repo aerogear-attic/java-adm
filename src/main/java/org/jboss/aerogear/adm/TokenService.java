@@ -17,26 +17,18 @@
 
 package org.jboss.aerogear.adm;
 
-import org.json.JSONObject;
 
+import org.jboss.aerogear.adm.internal.Utilities;
 import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
+
 
 public class TokenService {
 
-    private static final String UTF_8 = "UTF-8";
-    private static final Charset UTF_8_CHARSET= Charset.forName(UTF_8);
 
-    private static final String CLIENT_CREDENTIALS = "client_credentials";
-    private static final String MESSAGING_PUSH = "messaging:push";
-    private static final String HTTPS_API_AMAZON_COM_AUTH_O2_TOKEN = "https://api.amazon.com/auth/O2/token";
-    private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
     /**
      * To obtain an access token, make an HTTPS request to Amazon
@@ -50,22 +42,34 @@ public class TokenService {
     public String getAuthToken(String clientId, String clientSecret) throws Exception
     {
         // Encode the body of your request, including your clientID and clientSecret values.
-        String body = "grant_type="    + URLEncoder.encode(CLIENT_CREDENTIALS, UTF_8) + "&" +
-                "scope="         + URLEncoder.encode(MESSAGING_PUSH, UTF_8)     + "&" +
-                "client_id="     + URLEncoder.encode(clientId, UTF_8)             + "&" +
-                "client_secret=" + URLEncoder.encode(clientSecret, UTF_8);
+        String body = buildBody(clientId, clientSecret);
 
         // Generate the HTTPS connection. You cannot make a connection over HTTP.
         final HttpsURLConnection con = post(body);
 
         // Convert the response into a String object.
-        final String responseContent = parseResponse(con.getInputStream());
+        final String responseContent = Utilities.parseResponse(con.getInputStream());
 
-        // Create a new JSONObject to hold the access token and extract
-        // the token from the response.
-        final JSONObject parsedObject = new org.json.JSONObject(responseContent);
-        final String accessToken = parsedObject.getString("access_token");
+        final String accessToken = Utilities.getStringFromJson(responseContent, "access_token");
         return accessToken;
+    }
+
+
+    private String buildBody(String clientId, String clientSecret) throws UnsupportedEncodingException {
+        StringBuilder builder = new StringBuilder();
+        builder
+                .append("grant_type=")
+                .append(URLEncoder.encode(Utilities.CLIENT_CREDENTIALS, Utilities.UTF_8) )
+                .append("&")
+                .append("scope=")
+                .append( URLEncoder.encode(Utilities.MESSAGING_PUSH, Utilities.UTF_8) )
+                .append("&")
+                .append("client_id=")
+                .append("URLEncoder.encode(clientId, Utilities.UTF_8)")
+                .append("&")
+                .append("client_secret=")
+                .append(URLEncoder.encode(clientSecret, Utilities.UTF_8));
+        return builder.toString();
     }
 
     /**
@@ -73,18 +77,21 @@ public class TokenService {
      */
     private HttpsURLConnection post(final String payload) throws Exception {
 
-        final HttpsURLConnection conn = getHttpsURLConnection();
+        // Create a new URL object with the base URL for the access token request.
+        URL authUrl = new URL(Utilities.HTTPS_API_AMAZON_COM_AUTH_O2_TOKEN);
+
+        final HttpsURLConnection conn = Utilities.getHttpsURLConnection(authUrl);
         conn.setDoOutput(true);
         conn.setUseCaches(false);
 
         // Set the content type .
-        conn.setRequestProperty("content-type", APPLICATION_X_WWW_FORM_URLENCODED);
-        conn.setRequestProperty("charset", UTF_8);
+        conn.setRequestProperty("content-type", Utilities.APPLICATION_X_WWW_FORM_URLENCODED);
+        conn.setRequestProperty("charset", Utilities.UTF_8);
 
         conn.setRequestMethod("POST");
 
         OutputStream out = null;
-        final byte[] bytes = payload.getBytes(UTF_8_CHARSET);
+        final byte[] bytes = payload.getBytes(Utilities.UTF_8_CHARSET);
         try {
             out = conn.getOutputStream();
             out.write(bytes);
@@ -96,35 +103,7 @@ public class TokenService {
                 out.close();
             }
         }
-
         return conn;
     }
 
-    /**
-     * Convenience method to open/establish the HttpsURLConnection agains ADM
-     */
-    private HttpsURLConnection getHttpsURLConnection() throws Exception {
-        // Create a new URL object with the base URL for the access token request.
-        URL authUrl = new URL(HTTPS_API_AMAZON_COM_AUTH_O2_TOKEN);
-
-        final HttpsURLConnection conn = (HttpsURLConnection) authUrl.openConnection();
-        return conn;
-    }
-
-    private String parseResponse(InputStream in) throws Exception  {
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(in, UTF_8_CHARSET ));
-        final StringBuilder sb = new StringBuilder();
-
-        try {
-            String line = reader.readLine();
-            while(line != null) {
-                sb.append(line);
-                line = reader.readLine();
-            }
-        } finally {
-            reader.close();
-        }
-
-        return sb.toString();
-    }
 }
