@@ -64,7 +64,7 @@ public class TokenService {
                 .append( URLEncoder.encode(Utilities.MESSAGING_PUSH, Utilities.UTF_8) )
                 .append("&")
                 .append("client_id=")
-                .append("URLEncoder.encode(clientId, Utilities.UTF_8)")
+                .append(URLEncoder.encode(clientId, Utilities.UTF_8) )
                 .append("&")
                 .append("client_secret=")
                 .append(URLEncoder.encode(clientSecret, Utilities.UTF_8));
