@@ -30,7 +30,7 @@
 
     <scm>
         <connection>scm:git:git://github.com/aerogear/java-adm.git</connection>
-        <developerConnection>scm:git:git://github.com/aerogear/java-adm.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:aerogear/java-adm.git</developerConnection>
         <url>https://github.com/aerogear/java-adm</url>
         <tag>HEAD</tag>
     </scm>
