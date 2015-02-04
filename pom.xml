@@ -24,7 +24,7 @@
     </parent>
     <groupId>org.jboss.aerogear</groupId>
     <artifactId>java-adm</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0</version>
     <name>java-adm</name>
     <description>A Java Library to send Push Notification to the Amazon Device Messaging Network</description>
 
@@ -32,7 +32,7 @@
         <connection>scm:git:git://github.com/aerogear/java-adm.git</connection>
         <developerConnection>scm:git:git@github.com:aerogear/java-adm.git</developerConnection>
         <url>https://github.com/aerogear/java-adm</url>
-        <tag>HEAD</tag>
+        <tag>0.1.0</tag>
     </scm>
 
     <dependencies>
