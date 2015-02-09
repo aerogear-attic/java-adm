@@ -21,11 +21,11 @@ Add the following to your ```pom.xml``` file:
 <dependency>
   <groupId>org.jboss.aerogear</groupId>
   <artifactId>java-adm</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1.0</version>
 </dependency>
 ```
 
-Then :
+Then:
 
 ```
 final AdmService messageService = ADM.newService();
