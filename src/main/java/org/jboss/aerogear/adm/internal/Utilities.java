@@ -49,7 +49,7 @@ public final class Utilities {
     private Utilities() {}
 
     /**
-     * Convenience method to open/establish the HttpsURLConnection agains ADM
+     * Convenience method to open/establish the HttpsURLConnection against ADM
      */
     public static HttpsURLConnection getHttpsURLConnection(URL url) throws IOException {
         final HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();

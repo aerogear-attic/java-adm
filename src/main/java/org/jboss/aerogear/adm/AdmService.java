@@ -16,6 +16,7 @@
  */
 package org.jboss.aerogear.adm;
 
+import org.jboss.aerogear.adm.internal.AdmMessageRejectedException;
 import org.jboss.aerogear.adm.internal.Utilities;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -48,7 +49,7 @@ public class AdmService {
      * @return a String representing the registrationId sent back from ADM services.
      * @throws IOException if sending the message fails
      */
-    public String sendMessageToDevice(String registrationId, final String clientId, final String clientSecret, final String payload) throws IOException {
+    public String sendMessageToDevice(String registrationId, final String clientId, final String clientSecret, final String payload) throws IOException, AdmMessageRejectedException {
 
         if (accessToken == null) {
             accessToken = tokenService.getAuthToken(clientId,clientSecret);
@@ -63,15 +64,16 @@ public class AdmService {
 
         // Check if we received a failure response, and if so, get the reason for the failure.
         if (responseCode != 200) {
-            if ( responseCode == 401) {
-                accessToken = tokenService.getAuthToken(clientId,clientSecret);
+            if (responseCode == 401) {
+                // Access token has expired and should be refreshed
+                accessToken = tokenService.getAuthToken(clientId, clientSecret);
                 sendMessageToDevice(registrationId, clientId, clientSecret, payload);
             }
             else {
                 String errorContent = Utilities.parseResponse(conn.getErrorStream());
-                throw new RuntimeException(String.format("ERROR: The enqueue request failed with a " +
-                        "%d response code, with the following message: %s",
-                        responseCode, errorContent));
+                throw new AdmMessageRejectedException(String.format("ERROR: The enqueue request failed with a " +
+                                "%d response code, with the following message: ",
+                        responseCode, errorContent), responseCode);
             }
 
         }
