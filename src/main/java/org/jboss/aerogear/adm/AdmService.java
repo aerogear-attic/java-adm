@@ -18,8 +18,8 @@ package org.jboss.aerogear.adm;
 
 import org.jboss.aerogear.adm.internal.Utilities;
 
-
 import javax.net.ssl.HttpsURLConnection;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 
@@ -44,11 +44,11 @@ public class AdmService {
      * @param registrationId representing the unique identifier of the device
      * @param clientId unique ID supplied by ADM Services
      * @param clientSecret secret value supplied by ADM services
-     * @param payload , a String representing the complete payload to be submitted
-     * @return String , a String representing the registrationId sent back from ADM services.
-     * @throws Exception if sending the message fails
+     * @param payload a String representing the complete payload to be submitted
+     * @return a String representing the registrationId sent back from ADM services.
+     * @throws IOException if sending the message fails
      */
-    public String sendMessageToDevice(String registrationId, final String clientId, final String clientSecret, final String payload) throws Exception {
+    public String sendMessageToDevice(String registrationId, final String clientId, final String clientSecret, final String payload) throws IOException {
 
         if (accessToken == null) {
             accessToken = tokenService.getAuthToken(clientId,clientSecret);
@@ -87,13 +87,14 @@ public class AdmService {
                 registrationId = canonicalRegistrationId;
             }
         }
+
         return registrationId;
     }
 
     /**
      * Returns HttpsURLConnection that 'posts' the given payload to ADM.
      */
-    private HttpsURLConnection post(final String registrationId, final String payload) throws Exception {
+    private HttpsURLConnection post(final String registrationId, final String payload) throws IOException {
 
         // Establish the base URL, including the section to be replaced by the registration
         // ID for the desired app instance. Because we are using String.format to create
