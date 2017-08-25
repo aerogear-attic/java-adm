@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -48,9 +49,9 @@ public final class Utilities {
     private Utilities() {}
 
     /**
-     * Convenience method to open/establish the HttpsURLConnection agains ADM
+     * Convenience method to open/establish the HttpsURLConnection against ADM
      */
-    public static HttpsURLConnection getHttpsURLConnection(URL url) throws Exception {
+    public static HttpsURLConnection getHttpsURLConnection(URL url) throws IOException {
         final HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         return conn;
     }
@@ -58,11 +59,12 @@ public final class Utilities {
 
     /**
      * Generic method to parse an http response
+     *
      * @param in
      * @return
-     * @throws Exception
+     * @throws IOException
      */
-    public static String parseResponse(final InputStream in) throws Exception {
+    public static String parseResponse(final InputStream in) throws IOException {
         // Read from the input stream and convert into a String.
         final BufferedReader reader = new BufferedReader(new InputStreamReader(in, Utilities.UTF_8));
         final StringBuilder sb = new StringBuilder();

@@ -20,6 +20,7 @@ package org.jboss.aerogear.adm;
 
 import org.jboss.aerogear.adm.internal.Utilities;
 import javax.net.ssl.HttpsURLConnection;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -28,8 +29,6 @@ import java.net.URLEncoder;
 
 public class TokenService {
 
-
-
     /**
      * To obtain an access token, make an HTTPS request to Amazon
      * and include your client_id and client_secret values.
@@ -37,9 +36,9 @@ public class TokenService {
      * @param clientId unique ID supplied by ADM Services
      * @param clientSecret secret value supplied by ADM services
      * @return a String containing your auth token
-     * @throws Exception if retrieving the Auth token fails
+     * @throws IOException if retrieving the Auth token fails
      */
-    public String getAuthToken(String clientId, String clientSecret) throws Exception {
+    public String getAuthToken(String clientId, String clientSecret) throws IOException {
         // Encode the body of your request, including your clientID and clientSecret values.
         String body = buildBody(clientId, clientSecret);
 
@@ -74,7 +73,7 @@ public class TokenService {
     /**
      * Returns HttpsURLConnection that 'posts' the given payload to ADM.
      */
-    private HttpsURLConnection post(final String payload) throws Exception {
+    private HttpsURLConnection post(final String payload) throws IOException {
 
         // Create a new URL object with the base URL for the access token request.
         URL authUrl = new URL(Utilities.HTTPS_API_AMAZON_COM_AUTH_O2_TOKEN);
@@ -102,6 +101,7 @@ public class TokenService {
                 out.close();
             }
         }
+
         return conn;
     }
 
