@@ -1,3 +1,6 @@
+## Deprecation Notice
+This repository has been deprecated and is not being maintained. If you have any questions, please get in touch with the collaborators.
+
 # Amazon Device Messaging Java Connector [![Build Status](https://travis-ci.org/aerogear/java-adm.png)](https://travis-ci.org/aerogear/java-adm)
 
 A Java Library to send Push Notification to the Amazon Device Messaging Network.
